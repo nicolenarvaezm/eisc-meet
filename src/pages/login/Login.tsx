@@ -1,12 +1,20 @@
-import React, { useState } from 'react'
+import React, { useEffect } from 'react'
+import useAuthStore from '../../stores/useAuthStore';
+import { useNavigate } from 'react-router-dom';
 
 const Login: React.FC = () => {
-    const [username, setUsername] = useState('');
-    const [password, setPassword] = useState('');
+    const navigate = useNavigate();
+    const { loginWithGoogle, initAuthObserver } = useAuthStore();
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleLoginGoogle = (e: React.FormEvent) => {
         e.preventDefault();
-    };
+        loginWithGoogle().then(() => navigate("/profile"))
+    }
+
+    useEffect(() => {
+        const unsub = initAuthObserver();
+        return () => unsub();
+    }, [initAuthObserver]);
 
     return (
         <div className="container-page">
@@ -15,49 +23,8 @@ const Login: React.FC = () => {
                     Iniciar Sesión
                 </h1>
 
-                <form onSubmit={handleSubmit}>
-                    <div>
-                        <label htmlFor="username">
-                            Usuario
-                        </label>
-                        <input
-                            id="username"
-                            type="text"
-                            value={username}
-                            onChange={(e) => setUsername(e.target.value)}
-                            placeholder="Ingresa tu usuario"
-                            required
-                        />
-                    </div>
-
-                    <div >
-                        <label htmlFor="password" >
-                            Contraseña
-                        </label>
-                        <input
-                            id="password"
-                            type="password"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            placeholder="Ingresa tu contraseña"
-                            required
-
-                        />
-                    </div>
-
-                    <button type="submit" >
-                        Iniciar Sesión
-                    </button>
-                </form>
-
                 <div>
-
-                    <span >
-                        o inicia sesión con
-                    </span>
-
-
-                    <button>
+                    <button onClick={handleLoginGoogle} >
                         <img src="icons/google-icon.svg" alt="Iniciar sesión con Google" width={24} height={24} />
                         <span>Google</span>
                     </button>
