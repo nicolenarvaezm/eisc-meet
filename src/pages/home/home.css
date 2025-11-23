@@ -1,0 +1,128 @@
+:root {
+  --meet-bg: #f4f6fa;
+  --panel-bg: #fff;
+  --panel-radius: 20px;
+  --panel-shadow: 0 2px 16px #10182812;
+  --chat-border: 2px solid #e0e3eb;
+  --video-gray: #e7ebf0;
+  --button-bg: #2383e2;
+  --button-hover: #1a6fb1;
+  --button-radius: 12px;
+  --icon: #666;
+}
+
+.home-container {
+  display: flex;
+  height: 100vh;
+  background: var(--meet-bg);
+  gap: 0;
+}
+
+/* Panel de video + controles (izquierda) */
+.left-panel {
+  flex: 2;
+  display: flex;
+  flex-direction: column;
+  padding: 36px 40px 24px 40px;
+  background: var(--meet-bg);
+  min-width: 0;
+}
+
+/* "Card" de video estilo Meet */
+.video-section {
+  flex: 1;
+  background: var(--video-gray);
+  border-radius: var(--panel-radius);
+  box-shadow: var(--panel-shadow);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 24px;
+  min-height: 360px;
+  transition: box-shadow .2s;
+}
+
+/* Barra de controles debajo del video */
+.interaction-section {
+  background: var(--panel-bg);
+  border-radius: 16px;
+  box-shadow: var(--panel-shadow);
+  padding: 16px 12px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 24px;
+  min-height: 60px;
+}
+
+.interaction-section button {
+  background: var(--button-bg);
+  color: #fff;
+  border: none;
+  border-radius: var(--button-radius);
+  padding: 10px 20px;
+  font-size: 1.1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background .2s;
+  box-shadow: 0 1px 6px #10182822;
+}
+
+.interaction-section button:hover {
+  background: var(--button-hover);
+}
+
+/* Panel del chat (derecha) estilo Meet */
+.right-panel {
+  flex: 1;
+  background: var(--panel-bg);
+  border-left: var(--chat-border);
+  padding: 36px 28px 24px 28px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  border-top-right-radius: var(--panel-radius);
+  border-bottom-right-radius: var(--panel-radius);
+  box-shadow: var(--panel-shadow);
+  min-width: 0;
+}
+
+/* Chat Typography */
+.right-panel h1, .right-panel h2 {
+  margin: 0 0 20px 0;
+  color: var(--button-bg);
+  font-size: 1.8rem;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-align: center;
+}
+
+.right-panel .chat-box {
+  width: 100%;
+  min-height: 270px;
+  background: var(--video-gray);
+  border-radius: 18px;
+  box-shadow: 0 2px 10px #10182811;
+  margin-bottom: 20px;
+  padding: 18px;
+  overflow-y: auto;
+}
+
+/* Responsive para móviles */
+@media (max-width: 960px) {
+  .home-container {
+    flex-direction: column;
+    height: auto;
+  }
+  .left-panel, .right-panel {
+    padding: 20px 10px;
+    border-radius: 0;
+    min-width: 100%;
+  }
+  .right-panel {
+    border-left: none;
+    border-top: var(--chat-border);
+    box-shadow: none;
+  }
+}
+

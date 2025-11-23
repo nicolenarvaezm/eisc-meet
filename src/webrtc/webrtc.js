@@ -37,7 +37,7 @@ export const initWebRTC = async () => {
  */
 async function getMedia() {
   try {
-    return await navigator.mediaDevices.getUserMedia({ audio: true });
+    return await navigator.mediaDevices.getUserMedia({ audio: true, video:true });
   } catch (err) {
     console.error("Failed to get user media:", err);
     throw err;
@@ -183,7 +183,7 @@ function createPeerConnection(theirSocketId, isInitiator = false) {
  * @function disableOutgoingStream
  */
 export function disableOutgoingStream() {
-  localMediaStream.getTracks().forEach((track) => {
+  localMediaStream.getAudioTracks().forEach((track) => {
     track.enabled = false;
   });
 }
@@ -193,7 +193,7 @@ export function disableOutgoingStream() {
  * @function enableOutgoingStream
  */
 export function enableOutgoingStream() {
-  localMediaStream.getTracks().forEach((track) => {
+  localMediaStream.getAudioTracks().forEach((track) => {
     track.enabled = true;
   });
 }
@@ -213,6 +213,15 @@ function createClientMediaElements(_id) {
   audioEl.addEventListener("loadeddata", () => {
     audioEl.play();
   });
+
+  const videoEl = document.createElement("video");
+  videoEl.id = `${_id}_video`;
+  videoEl.autoplay = true;
+  videoEl.playsInline = true;
+  videoEl.muted = (_id === socket.id);
+  document.body.appendChild(videoEl);
+
+  videoEl.addEventListener("loadeddata", () => videoEl.play());
 }
 
 /**
@@ -226,6 +235,11 @@ function updateClientMediaElements(_id, stream) {
   if (audioEl) {
     audioEl.srcObject = new MediaStream([stream.getAudioTracks()[0]]);
   }
+
+  const videoEl = document.getElementById(`${_id}_video`);
+  if (videoEl) {
+    videoEl.srcObject = stream;
+  }
 }
 
 /**
@@ -238,4 +252,25 @@ function removeClientAudioElement(_id) {
   if (audioEl) {
     audioEl.remove();
   }
+
+  const videoEl = document.getElementById(`${_id}_video`);
+  if (videoEl) videoEl.remove();
+}
+
+
+//enable video
+export function enableOutgoingVideo() {
+  localMediaStream.getVideoTracks().forEach((track) => {
+    track.enabled = true;
+  });
+}
+
+//disble video
+export function disableOutgoingVideo() {
+  localMediaStream.getVideoTracks().forEach((track) => {
+    track.enabled = false;
+  });
+}
+export function getLocalMediaStream() {
+  return localMediaStream;
 }

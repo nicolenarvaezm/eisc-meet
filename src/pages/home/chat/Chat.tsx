@@ -1,108 +1,93 @@
 import React, { useEffect, useRef, useState } from "react";
 import { socket } from "../../../sockets/socketManager";
+import useAuthStore from "../../../stores/useAuthStore";
 
-type ChatMessage = {
-  userId: string;
-  message: string;
-  timestamp: string;
-};
 
-const Chat: React.FC = () => {
-  const usernameRef = useRef(
-    `user-${Math.random().toString(36).slice(2, 8)}`
-  );
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const [messageDraft, setMessageDraft] = useState("");
+const Home: React.FC = () => {
+  const { user } = useAuthStore();
+  const [message, setMessage] = useState("");
+  const [messages, setMessages] = useState<{ sender: string; text: string; time: string }[]>([]);
 
   useEffect(() => {
-    socket.emit("newUser", usernameRef.current);
-  }, []);
+    if (!user) return;
+    socket.emit("newUser", user.displayName ?? "");
 
-  useEffect(() => {
-    const handleIncomingMessage = (payload: ChatMessage) => {
-      setMessages(prev => [...prev, payload]);
-    };
-
-    socket.on("chat:message", handleIncomingMessage);
-
-    return () => {
-      socket.off("chat:message", handleIncomingMessage);
-    };
-  }, []);
-
-  const handleSendMessage = (event: React.FormEvent) => {
-    event.preventDefault();
-    const trimmedMessage = messageDraft.trim();
-
-    if (!trimmedMessage) {
-      return;
-    }
-
-    socket.emit("chat:message", {
-      userId: usernameRef.current,
-      message: trimmedMessage
+    socket.on("receiveMessage", (data: any) => {
+      
+      const normalized = {
+        sender: data.sender,
+        text: data.text,
+        time: data.time ?? new Date().toISOString(),
+      };
+      setMessages((prev) => [...prev, normalized]);
     });
 
-    setMessageDraft("");
+    return () => {
+      socket.off("receiveMessage");
+    };
+  }, [user]);
+
+  const handleSend = () => {
+    if (!message.trim() || !user) return;
+  const msgData = { sender: user.displayName ?? "Anon", text: message, time: new Date().toISOString() };
+  socket.emit("sendMessage", msgData);
+    //setMessages(prev => [...prev, msgData]);
+    setMessage("");
   };
 
   return (
-    <div className="container-page">
-      <div className="flex flex-col gap-4 w-full">
-        <h1>EISC Meet</h1>
-        <div className="w-full h-64 rounded border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-3 text-sm overflow-y-auto flex flex-col gap-3">
-          {messages.length === 0 ? (
-            <p className="text-center text-gray-400">
-              Aquí verás los mensajes del chat...
-            </p>
-          ) : (
-            messages.map((msg, index) => {
-              const isOwn = msg.userId === usernameRef.current;
-              const time = new Date(msg.timestamp).toLocaleTimeString([], {
-                hour: "2-digit",
-                minute: "2-digit"
-              });
+    <div className="p-4">
+      <h1 className="text-xl mb-4" style={{marginBottom: "3rem", marginTop: "1rem"}}>Chat en tiempo real</h1>
 
-              return (
-                <div
-                  key={`${msg.timestamp}-${index}`}
-                  className={`flex ${isOwn ? "justify-end" : "justify-start"}`}
-                >
-                  <div
-                    className={`max-w-[75%] rounded-lg px-3 py-2 text-sm ${
-                      isOwn
-                        ? "bg-purple-600 text-white text-right"
-                        : "bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100"
-                    }`}
-                  >
-                    <div className="text-xs opacity-70 mb-1">
-                      {msg.userId} · {time}
+      <div className="border rounded p-4 h-64 overflow-y-auto bg-white" style={{ marginLeft: "5rem", marginRight: "5rem", marginBottom: "1rem" }}>
+        {messages.map((msg, i) => {
+          const isLocal = user && msg.sender === user.displayName;
+          return (
+            <div key={i} className={`mb-3 flex ${isLocal ? "justify-end" : "justify-start"}`}>
+              <div className="max-w-[70%]">
+                {isLocal ? (
+                  // Usuario local (derecha)
+                  <div className="text-right">
+                    <div className="text-sm text-gray-500 mb-1">
+                      {msg.sender}
+                      
                     </div>
-                    <div className="whitespace-pre-wrap wrap-break-word">
-                      {msg.message}
+                    
+                    <div className="inline-block bg-teal-600 text-white px-4 py-2 rounded-lg">
+                      {msg.text}
                     </div>
+                    <div className="text-xs text-gray-400 mt-1">{new Date(msg.time).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })}</div>
                   </div>
-                </div>
-              );
-            })
-          )}
-        </div>
+                  
+                ) : (
+                  // No local (izquierda)
+                  <div className="text-left">
+                    <div className="text-sm font-semibold text-teal-600 mb-1">{msg.sender}</div>
+                    <div className="inline-block bg-gray-100 text-gray-900 px-4 py-2 rounded-lg">
+                      {msg.text}
+                    </div>
+                    <div className="text-xs text-gray-400 mt-1">{new Date(msg.time).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })}</div>
+                  </div>
+                )}
+              </div>
+            </div>
+          );
+        })}
+      </div>
 
-        <form
-          onSubmit={handleSendMessage}
-          className="flex flex-col sm:flex-row gap-2 w-full"
-        >
-          <input
-            className="flex-1 rounded border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-2 text-sm focus:outline-none focus:ring-2 focus:ring-violet-400"
-            placeholder="Escribe tu mensaje aquí"
-            value={messageDraft}
-            onChange={event => setMessageDraft(event.target.value)}
-          />
-          <button type="submit">Enviar</button>
-        </form>
+      <div className="mt-3 flex gap-2" style={{ marginLeft: "5rem", marginRight: "5rem", marginBottom: "1rem" }}>
+        <input
+          value={message}
+          onChange={(e) => setMessage(e.target.value)}
+          className="border p-1 flex-1 rounded"
+          placeholder="Escribe un mensaje..."
+        />
+        <button onClick={handleSend} className="text-white px-3 rounded">
+          Enviar
+        </button>
       </div>
     </div>
   );
 };
 
-export default Chat;
+export default Home;
