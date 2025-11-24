@@ -1,5 +1,5 @@
-import { useState, useCallback } from "react";
-import { initWebRTC } from "../../../webrtc/webrtc";
+import { useState, useCallback, useRef } from "react";
+import { disableOutgoingStream, disableOutgoingVideo, enableOutgoingStream, enableOutgoingVideo, initWebRTC } from "../../../webrtc/webrtc.js";
 /**
  * Component for controlling voice input/output.
  * @returns {JSX.Element} The JSX.Element containing the voice control button.
@@ -8,19 +8,35 @@ export default function Interaction() {
   const [isSpeaking, setIsSpeaking] = useState(false); // State to track if the user is speaking
   const [callPeers, setCallPeers] = useState(true); // State to track if peers should be called
 
-  // Function to start speaking
-  const speak = useCallback(() => {
+  const [videoOn, setVideoOn] = useState(true);
+  //const [isStreamReady, setIsStreamReady] = useState(false);
+
+ // Function to start speaking
+  const speak = useCallback(async () => {
     setIsSpeaking(true);
 
     if (callPeers) {
       setCallPeers(false);
-      initWebRTC();
+      await initWebRTC();   // Inicia la conexión WebRTC
     }
+    enableOutgoingStream(); // Activa el micro para transmisión
   }, [callPeers]);
 
-  // Function to stop speaking
   const stop = useCallback(() => {
     setIsSpeaking(false);
+    disableOutgoingStream(); // Mutea el stream transmitido
+  }, []);
+
+  // Función para iniciar la cámara
+  const startVideo = useCallback(async () => {
+    enableOutgoingVideo();
+    setVideoOn(true);
+  }, []);
+
+  // Función para apagar la cámara
+  const stopVideo = useCallback(() => {
+    disableOutgoingVideo();
+    setVideoOn(false);
   }, []);
 
   return (
@@ -28,11 +44,12 @@ export default function Interaction() {
       <div className="flex flex-col gap-4 w-full">
         <div className="button-speak">
           <button onClick={isSpeaking ? stop : speak}>
-            {isSpeaking ? (
-              "Mutear"
-            ) : (
-              "Hablar"
-            )}
+            {isSpeaking ? "Mutear" : "Hablar" }
+          </button>
+        </div>
+        <div className="button-video">
+          <button onClick={videoOn ? stopVideo : startVideo}>
+            {videoOn ? "Apagar cámara" : "Prender cámara"}
           </button>
         </div>
       </div>
