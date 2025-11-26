@@ -1,4 +1,4 @@
-#Important: You must test on the same browser
+# Important: You must test on the same browser
 
 # React + TypeScript + Vite
 
