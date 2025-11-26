@@ -1,5 +1,6 @@
 import { useState, useCallback, useRef } from "react";
 import { disableOutgoingStream, disableOutgoingVideo, enableOutgoingStream, enableOutgoingVideo, initWebRTC } from "../../../webrtc/webrtc.js";
+import "./interaction.css";
 /**
  * Component for controlling voice input/output.
  * @returns {JSX.Element} The JSX.Element containing the voice control button.
@@ -40,8 +41,8 @@ export default function Interaction() {
   }, []);
 
   return (
-    <div className="container-page">
-      <div className="flex flex-col gap-4 w-full">
+    <div className="container-page-meet">
+      <div className="flex flex-row gap-4 w-full justify-center">
         <div className="button-speak">
           <button onClick={isSpeaking ? stop : speak}>
             {isSpeaking ? "Mutear" : "Hablar" }

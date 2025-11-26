@@ -10,7 +10,7 @@ const Home: React.FC = () => {
   // Ref para el contenedor del chat (para hacer scroll interno)
   const chatContainerRef = useRef<HTMLDivElement>(null);
 
-  // Sala por defecto (puedes cambiarla o hacerla configurable)
+  // Sala por defecto 
   const defaultRoom = "general";
 
   useEffect(() => {
@@ -55,20 +55,19 @@ const Home: React.FC = () => {
     };
     console.log("Enviando mensaje:", payload); // Log para confirmar envío
     socket.emit("chat:message", payload);
-    // Eliminado: No agregues localmente para evitar duplicados; el servidor lo enviará de vuelta
     setMessage("");
   };
 
   return (
-    <div className="p-4">
-      <h1 className="text-xl mb-4" style={{ marginBottom: "3rem", marginTop: "1rem" }}>
+    <div className="p-4 ">
+      <h1 className="text-xl mb-4" style={{ marginBottom: "3rem", marginTop: "1rem", color: "#008080" }}>
         Chat en tiempo real
       </h1>
 
       {/* Mensajes del chat */}
       <div
         ref={chatContainerRef}
-        className="border rounded p-4 h-64 overflow-y-auto bg-white"
+        className="border rounded p-4 h-90 overflow-y-auto bg-white"
         style={{ marginLeft: "5rem", marginRight: "5rem", marginBottom: "1rem" }}
       >
         {messages.map((msg, i) => {
@@ -119,10 +118,10 @@ const Home: React.FC = () => {
         <input
           value={message}
           onChange={(e) => setMessage(e.target.value)}
-          className="border p-1 flex-1 rounded"
+          className="border p-2 rounded basis-3/4 min-w-0"
           placeholder="Escribe un mensaje..."
         />
-        <button onClick={handleSend} className="text-white px-3 rounded">
+        <button onClick={handleSend} className="text-white bg-teal-600 px-3 py-2 rounded basis-1/4">
           Enviar
         </button>
       </div>

@@ -1,0 +1,16 @@
+
+.container-page-meet .button-speak button,
+.container-page-meet .button-video button {
+    background-color: teal;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 0.375rem;
+    cursor: pointer;
+    font-size: 1rem;
+
+}
+
+.container-page-meet .button-speak button:hover,
+.container-page-meet .button-video button:hover {
+    background-color: #0d7272; 
+}
