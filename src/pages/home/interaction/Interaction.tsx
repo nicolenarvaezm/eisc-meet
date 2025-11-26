@@ -7,32 +7,35 @@ import "./interaction.css";
  */
 export default function Interaction() {
   const [isSpeaking, setIsSpeaking] = useState(false); // State to track if the user is speaking
-  const [callPeers, setCallPeers] = useState(true); // State to track if peers should be called
 
-  const [videoOn, setVideoOn] = useState(true);
-  //const [isStreamReady, setIsStreamReady] = useState(false);
+  const [videoOn, setVideoOn] = useState(false);
+  const [isInitialized, setIsInitialized] = useState(false);
 
- // Function to start speaking
-  const speak = useCallback(async () => {
-    setIsSpeaking(true);
-
-    if (callPeers) {
-      setCallPeers(false);
-      await initWebRTC();   // Inicia la conexión WebRTC
+  const ensureInit = useCallback(async () => {
+    if (!isInitialized) {
+      await initWebRTC();       
+      setIsInitialized(true);
     }
-    enableOutgoingStream(); // Activa el micro para transmisión
-  }, [callPeers]);
+  }, [isInitialized]);
+
+ // Audio
+  const speak = useCallback(async () => {
+    await ensureInit();        
+    enableOutgoingStream();
+    setIsSpeaking(true);
+  }, [ensureInit]);
 
   const stop = useCallback(() => {
     setIsSpeaking(false);
-    disableOutgoingStream(); // Mutea el stream transmitido
+    disableOutgoingStream(); 
   }, []);
 
-  // Función para iniciar la cámara
+  // Video
   const startVideo = useCallback(async () => {
+    await ensureInit();         
     enableOutgoingVideo();
     setVideoOn(true);
-  }, []);
+  }, [ensureInit]);
 
   // Función para apagar la cámara
   const stopVideo = useCallback(() => {

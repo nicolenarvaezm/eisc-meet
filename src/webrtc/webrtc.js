@@ -10,6 +10,12 @@ const iceServerCredential = import.meta.env.VITE_ICE_SERVER_CREDENTIAL;
 let socket = null;
 let peers = {};
 let localMediaStream = null;
+let remoteStreams = {};
+
+// Getter para React
+export function getRemoteStreams() {
+  return remoteStreams;
+}
 
 /**
  * Initializes the WebRTC connection if supported.
@@ -236,10 +242,8 @@ function updateClientMediaElements(_id, stream) {
     audioEl.srcObject = new MediaStream([stream.getAudioTracks()[0]]);
   }
 
-  const videoEl = document.getElementById(`${_id}_video`);
-  if (videoEl) {
-    videoEl.srcObject = stream;
-  }
+  remoteStreams[_id] = stream;
+
 }
 
 /**
@@ -255,6 +259,8 @@ function removeClientAudioElement(_id) {
 
   const videoEl = document.getElementById(`${_id}_video`);
   if (videoEl) videoEl.remove();
+
+  delete remoteStreams[_id];
 }
 
 
